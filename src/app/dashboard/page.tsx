@@ -14,6 +14,7 @@ import { CirclePlus } from "lucide-react";
 import Link from "next/link";
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
+import { cn } from "@/lib/utils";
 
 export default async function Home() {
   const result = await db.select().from(Invoices);
@@ -47,7 +48,7 @@ export default async function Home() {
               <TableRow key={item.id}>
                 <TableCell className="font-medium text-left p-0">
                   <Link
-                    href={`/invoices/${item.id}`}
+                    href={`/invoice/${item.id}`}
                     className="font-semibold block p-4"
                   >
                     {new Date(item.createTs).toLocaleDateString()}
@@ -67,12 +68,20 @@ export default async function Home() {
                   </Link>
                 </TableCell>
                 <TableCell className="text-center p-0">
-                  <Link className="block p-4" href={`/invoices/${item.id}`}>
-                    <Badge className="rounded-full p-2">{item.status}</Badge>
+                  <Link className="block p-4" href={`/invoice/${item.id}`}>
+                    <Badge
+                      className={cn(
+                        "rounded-full capitalize",
+                        item.status === "open" && "bg-blue-500",
+                        item.status === "paid" && "bg-green-600"
+                      )}
+                    >
+                      {item.status}
+                    </Badge>
                   </Link>
                 </TableCell>
                 <TableCell className="text-right font-semibold p-0">
-                  <Link className="block p-4" href={`/invoices/${item.id}`}>
+                  <Link className="block p-4" href={`/invoice/${item.id}`}>
                     ${(item.value / 100).toFixed(2)}
                   </Link>
                 </TableCell>
