@@ -8,17 +8,22 @@ import { cn } from "@/lib/utils";
 export default async function InvoicePage({
   params,
 }: {
-  params: { invoiceId: string };
+  params: Promise<{ invoiceId: string }>;
 }) {
-  const invoiceId = parseInt(params.invoiceId);
+  const resolvedParams = await params;
+  const { invoiceId } = resolvedParams;
+
+  const invoiceIdNumber = Number(invoiceId);
+
+  if (isNaN(invoiceIdNumber)) {
+    throw new Error("Incorrect invoice ID");
+  }
 
   const [invoice] = await await db
     .select()
     .from(Invoices)
     .where(eq(Invoices.id, invoiceId))
     .limit(1);
-
-  console.log(invoice);
 
   if (!invoice) {
     notFound();
