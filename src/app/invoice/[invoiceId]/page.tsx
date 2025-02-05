@@ -19,10 +19,10 @@ export default async function InvoicePage({
     throw new Error("Incorrect invoice ID");
   }
 
-  const [invoice] = await await db
+  const [invoice] = await db
     .select()
     .from(Invoices)
-    .where(eq(Invoices.id, invoiceId))
+    .where(eq(Invoices.id, invoiceIdNumber))
     .limit(1);
 
   if (!invoice) {
