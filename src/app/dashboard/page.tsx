@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { auth } from "@clerk/nextjs/server";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -16,9 +17,19 @@ import { db } from "@/db";
 import { Invoices } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import Container from "@/components/Container";
+import { eq } from "drizzle-orm";
 
 export default async function Home() {
-  const result = await db.select().from(Invoices);
+  const { userId } = await auth();
+
+  if (!userId) {
+    return;
+  }
+
+  const result = await db
+    .select()
+    .from(Invoices)
+    .where(eq(Invoices.userId, userId));
   return (
     <main className="h-full">
       <Container>

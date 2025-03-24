@@ -1,9 +1,10 @@
 import { Badge } from "@/components/ui/badge";
 import { db } from "@/db";
 import { Invoices } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { auth } from "@clerk/nextjs/server";
 
 export default async function InvoicePage({
   params,
@@ -19,10 +20,16 @@ export default async function InvoicePage({
     throw new Error("Incorrect invoice ID");
   }
 
+  const { userId } = await auth();
+
+  if (!userId) {
+    return;
+  }
+
   const [invoice] = await db
     .select()
     .from(Invoices)
-    .where(eq(Invoices.id, invoiceIdNumber))
+    .where(and(eq(Invoices.id, invoiceIdNumber), eq(Invoices.userId, userId)))
     .limit(1);
 
   if (!invoice) {

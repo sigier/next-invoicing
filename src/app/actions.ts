@@ -19,6 +19,7 @@ export async function createAction(formData: FormData) {
     .values({
       value,
       description,
+      userId,
       status: "open",
     })
     .returning({
