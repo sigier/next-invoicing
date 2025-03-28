@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { CirclePlus } from "lucide-react";
 import Link from "next/link";
 import { db } from "@/db";
-import { Invoices } from "@/db/schema";
+import { Customers, Invoices } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import Container from "@/components/Container";
 import { eq } from "drizzle-orm";
@@ -29,7 +29,16 @@ export default async function Home() {
   const result = await db
     .select()
     .from(Invoices)
+    .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
     .where(eq(Invoices.userId, userId));
+
+  const invoices = result?.map(({ invoices, customers }) => {
+    return {
+      ...invoices,
+      customer: customers,
+    };
+  });
+
   return (
     <main className="h-full">
       <Container>
@@ -56,7 +65,7 @@ export default async function Home() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {result.map((item) => {
+            {invoices.map((item) => {
               return (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium text-left p-0">
@@ -72,12 +81,12 @@ export default async function Home() {
                       href={`/invoices/${item.id}`}
                       className="font-semibold block p-4"
                     >
-                      Rogan S.
+                      {item.customer.name}
                     </Link>
                   </TableCell>
                   <TableCell className="text-left p-0">
                     <Link className="block p-4" href={`/invoices/${item.id}`}>
-                      rogans@scuise.com
+                      {item.customer.email}
                     </Link>
                   </TableCell>
                   <TableCell className="text-center p-0">
