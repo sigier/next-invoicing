@@ -5,8 +5,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { createAction } from "@/app/actions";
 import { SyntheticEvent, useState } from "react";
 import Form from "next/form";
-import SubmitButton from "@/components/submitButton";
 import Container from "@/components/Container";
+import SubmitButton from "@/components/SubmitButton";
 
 export default function Home() {
   const [state, setState] = useState("ready");

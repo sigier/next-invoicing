@@ -17,25 +17,35 @@ import { db } from "@/db";
 import { Customers, Invoices } from "@/db/schema";
 import { cn } from "@/lib/utils";
 import Container from "@/components/Container";
-import { eq } from "drizzle-orm";
+import { eq, isNull, and } from "drizzle-orm";
 
 export default async function Home() {
-  const { userId } = await auth();
+  const { userId, orgId } = await auth();
 
   if (!userId) {
     return;
   }
 
-  const result = await db
-    .select()
-    .from(Invoices)
-    .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
-    .where(eq(Invoices.userId, userId));
+  let result;
 
-  const invoices = result?.map(({ invoices, customers }) => {
+  if (orgId) {
+    result = await db
+      .select()
+      .from(Invoices)
+      .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
+      .where(eq(Invoices.organizationId, orgId));
+  } else {
+    result = await db
+      .select()
+      .from(Invoices)
+      .innerJoin(Customers, eq(Invoices.customerId, Customers.id))
+      .where(and(eq(Invoices.userId, userId), isNull(Invoices.organizationId)));
+  }
+
+  const bills = result?.map(({ Invoices, Customers }) => {
     return {
-      ...invoices,
-      customer: customers,
+      ...Invoices,
+      customer: Customers,
     };
   });
 
@@ -46,7 +56,7 @@ export default async function Home() {
           <h1 className="text-3xl font-bold mb-4">Bills</h1>
           <p>
             <Button className="inline-flex gap-2" variant="ghost" asChild>
-              <Link href="invoice/new">
+              <Link href="invoices/new">
                 <CirclePlus className="h-4 w-4" />
                 Bills
               </Link>
@@ -65,12 +75,12 @@ export default async function Home() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {invoices.map((item) => {
+            {bills.map((item) => {
               return (
                 <TableRow key={item.id}>
                   <TableCell className="font-medium text-left p-0">
                     <Link
-                      href={`/invoice/${item.id}`}
+                      href={`/invoices/${item.id}`}
                       className="font-semibold block p-4"
                     >
                       {new Date(item.createTs).toLocaleDateString()}
@@ -90,7 +100,7 @@ export default async function Home() {
                     </Link>
                   </TableCell>
                   <TableCell className="text-center p-0">
-                    <Link className="block p-4" href={`/invoice/${item.id}`}>
+                    <Link className="block p-4" href={`/invoices/${item.id}`}>
                       <Badge
                         className={cn(
                           "rounded-full capitalize",
@@ -103,7 +113,7 @@ export default async function Home() {
                     </Link>
                   </TableCell>
                   <TableCell className="text-right font-semibold p-0">
-                    <Link className="block p-4" href={`/invoice/${item.id}`}>
+                    <Link className="block p-4" href={`/invoices/${item.id}`}>
                       ${(item.value / 100).toFixed(2)}
                     </Link>
                   </TableCell>

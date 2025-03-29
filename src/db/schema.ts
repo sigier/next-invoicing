@@ -18,22 +18,24 @@ export const statusEnum = pgEnum(
   statuses as [Status, ...Array<Status>]
 );
 
-export const Invoices = pgTable("invoices", {
+export const Invoices = pgTable("Invoices", {
   id: serial("id").primaryKey().notNull(),
   createTs: timestamp("createTs").defaultNow().notNull(),
   value: integer("value").notNull(),
   description: text("description").notNull(),
   userId: text("userId").notNull(),
+  organizationId: text("organizationId"),
   customerId: integer("customerId")
     .notNull()
     .references(() => Customers.id),
   status: statusEnum("status").notNull(),
 });
 
-export const Customers = pgTable("customers", {
+export const Customers = pgTable("Customers", {
   id: serial("id").primaryKey().notNull(),
   createTs: timestamp("createTs").defaultNow().notNull(),
   name: text("name").notNull(),
   email: text("email").notNull(),
   userId: text("userId").notNull(),
+  organizationId: text("organizationId"),
 });
