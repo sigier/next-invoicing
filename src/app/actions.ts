@@ -7,6 +7,10 @@ import { redirect } from "next/navigation";
 import { db } from "@/db";
 import { Customers, Invoices, type Status } from "@/db/schema";
 import { and, eq, isNull } from "drizzle-orm";
+import { headers } from "next/headers";
+import Stripe from "stripe";
+
+const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY));
 
 export async function createAction(formData: FormData) {
   const { userId, orgId } = await auth();
@@ -53,14 +57,11 @@ export async function createAction(formData: FormData) {
       id: Invoices.id,
     });
 
-  console.log(results);
-
   redirect(`/invoices/${results[0].id}`);
 }
 
 export async function updateStatusAction(formData: FormData) {
   const { userId, orgId } = await auth();
-
   if (!userId) {
     return;
   }
@@ -97,9 +98,6 @@ export async function updateStatusAction(formData: FormData) {
 export async function deleteInvoiceAction(formData: FormData) {
   const { userId, orgId } = await auth();
 
-  // Deleting disabled for demo
-  if (userId !== process.env.ME_ID) return;
-
   if (!userId) {
     return;
   }
@@ -128,4 +126,41 @@ export async function deleteInvoiceAction(formData: FormData) {
   }
 
   redirect("/dashboard");
+}
+
+export async function createPayment(formData: FormData) {
+  const headersList = await headers();
+  const origin = headersList.get("origin");
+  const id = Number.parseInt(formData.get("id") as string);
+
+  const [result] = await db
+    .select({
+      status: Invoices.status,
+      value: Invoices.value,
+    })
+    .from(Invoices)
+    .where(eq(Invoices.id, id))
+    .limit(1);
+
+  const session = await stripe.checkout.sessions.create({
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product: String(process.env.STRIPE_PRODUCT_ID),
+          unit_amount: result.value,
+        },
+        quantity: 1,
+      },
+    ],
+    mode: "payment",
+    success_url: `${origin}/invoices/${id}/payment?status=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${origin}/invoices/${id}/payment?status=canceled&session_id={CHECKOUT_SESSION_ID}`,
+  });
+
+  if (!session.url) {
+    throw new Error("Invalid Session");
+  }
+
+  redirect(session.url);
 }

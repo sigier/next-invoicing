@@ -42,7 +42,6 @@ export default async function InvoicePage(props: {
     .where(conditions)
     .limit(1);
 
-  console.log(result);
   const [row] = result;
 
   if (!row) {
