@@ -1,6 +1,5 @@
-# 🧾 [InvoLuxe](http://localhost:3000/dashboard)
+# 🧾 [InvoLuxe]
 
-\n
 
 Welcome to the **Next.js Involuxe App**. This is modern web application designed to help businesses manage invoices effortlessly. Built with cutting-edge technologies to ensure scalability, security, and performance.
 
