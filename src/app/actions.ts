@@ -9,8 +9,12 @@ import { Customers, Invoices, type Status } from "@/db/schema";
 import { and, eq, isNull } from "drizzle-orm";
 import { headers } from "next/headers";
 import Stripe from "stripe";
+import { Resend } from "resend";
 
 const stripe = new Stripe(String(process.env.STRIPE_SECRET_KEY));
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+import { InvoiceCreatedEmail } from "@/emails/invoice-created";
 
 export async function createAction(formData: FormData) {
   const { userId, orgId } = await auth();
@@ -56,6 +60,13 @@ export async function createAction(formData: FormData) {
     .returning({
       id: Invoices.id,
     });
+
+  await resend.emails.send({
+    from: "Space Jelly <info@test.spacejelly.dev>",
+    to: [email],
+    subject: "You Have a New Invoice",
+    react: InvoiceCreatedEmail({ invoiceId: results[0].id }),
+  });
 
   redirect(`/invoices/${results[0].id}`);
 }

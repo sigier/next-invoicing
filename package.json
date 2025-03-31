@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "generate": "drizzle-kit generate",
-    "migrate": "drizzle-kit migrate"
+    "migrate": "drizzle-kit migrate",
+    "email": "email dev --dir ./src/emails"
   },
   "dependencies": {
     "@clerk/elements": "^0.23.5",
@@ -27,12 +28,14 @@
     "pg": "^8.13.1",
     "react": "^19.0.0-rc.1",
     "react-dom": "^19.0.0-rc.1",
+    "resend": "^4.2.0",
     "stripe": "^17.7.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@react-email/components": "0.0.34",
     "@types/node": "^20",
     "@types/pg": "^8.11.11",
     "@types/react": "^19",
