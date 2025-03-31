@@ -31,7 +31,7 @@ export default function SignInPage() {
               <rect width="20" height="14" x="2" y="6" rx="2"></rect>
             </svg>
             <h1 className="mt-4 text-xl font-medium tracking-tight text-neutral-950">
-              Sign in to Invoice Ledger
+              Sign in to InvoLuxe
             </h1>
           </header>
           <Clerk.GlobalError className="block text-sm text-red-600" />
